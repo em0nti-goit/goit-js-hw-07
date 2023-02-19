@@ -7,18 +7,13 @@ const galleryRef = document.querySelector('.gallery');
 //EventListeners
 galleryRef.addEventListener('click', onGalleryImgClick);
 
-function handleEscKeyPress(e, basicLightboxInstance) {
+let instance = null;
+
+function handleEscKeyPress(e) {
     console.log(e); //for testing purpose
     if (e.code === 'Escape') {
-        basicLightboxInstance.close();
-        window.removeEventListener('keydown',onKeydownHandler);
+        instance.close();
         console.log("window.removeEventListener"); //for testing
-    }
-}
-
-function onKeydownHandler(basicLightboxInstance) {
-    return function (e) {
-        handleEscKeyPress(e, basicLightboxInstance);
     }
 }
 
@@ -27,9 +22,15 @@ function onGalleryImgClick(e) {
     if (!e.target.classList.contains('gallery__image')) return;
     e.preventDefault();
     const url = e.target.dataset.source;
-    const instance = basicLightbox.create(`<img src="${url}">`);
+    instance = basicLightbox.create(`<img src="${url}">`, {
+        onShow: () => {
+            window.addEventListener('keydown', handleEscKeyPress);
+        },
+        onClose: () => {
+            window.removeEventListener('keydown', handleEscKeyPress);
+        }
+    });
     instance.show();
-    window.addEventListener('keydown', onKeydownHandler(instance));
 }
 
 //Markup gallery
